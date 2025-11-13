@@ -1,0 +1,11 @@
+{
+    "sections": {
+        "featured-products": {
+            "type": "featured-products",
+            "settings": {
+                "featured_products": "all"
+              }
+        }
+    },
+    "order": ["featured-products"]
+}
