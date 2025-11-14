@@ -29,7 +29,9 @@
     "contact_form_BRiMhG": {
       "type": "contact-form",
       "name": "Contact Form",
-      "settings": {}
+      "settings": {
+        "title": "Contact us"
+      }
     }
   },
   "order": [
