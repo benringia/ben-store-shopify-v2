@@ -78,20 +78,26 @@
 
                 <div class="my-3">
                     {% assign product_price = selected_variant %}
-                    <span class="text-base text-gray-500 line-through">
-                        {{ product_price.compare_at_price | money}}
+                    
+                    <span id="compare-price" class="text-base text-gray-500 line-through">
+                        {{ product_price.compare_at_price | money }}
                     </span>
 
-                    <span class="text-lg text-gray-900">
-                        {{ product_price.price | money}}
+                    <span id="main-price" class="text-lg text-gray-900">
+                        {{ product_price.price | money }}
                     </span>
 
-                    {% if product_price.price < product_price.compare_at_price %}
-                        <span class="px-5 py-1 text-sm font-bold bg-red-500 rounded-full text-white mx-4">
-                            Sale
-                        </span>
-                    {% endif %}
+                    <span 
+                        id="sale-badge"
+                        class="px-5 py-1 text-sm font-bold bg-red-500 rounded-full text-white mx-4"
+                        {% unless product_price.price < product_price.compare_at_price %}
+                            style="display:none"
+                        {% endunless %}
+                    >
+                        Sale
+                    </span>
                 </div>
+
 
                 <div class="my-3">
                     {% unless product.has_only_default_variant %}
@@ -170,3 +176,68 @@
 </script>
 
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // 1. Product data from Shopify
+    const productData = {{ product | json }};
+
+    const form = document.getElementById('product-form');
+    const variantInput = form.querySelector('input[name="id"]');
+    const selects = form.querySelectorAll('select');
+
+    // 2. Price elements
+    const mainPrice = document.getElementById('main-price');
+    const comparePrice = document.getElementById('compare-price');
+    const saleBadge = document.getElementById('sale-badge');
+
+    function updateVariant() {
+        let selectedOptions = [];
+
+        selects.forEach(select => {
+            selectedOptions.push(select.value);
+        });
+
+        // Find variant based on selected options
+        const matchedVariant = productData.variants.find(variant =>
+            JSON.stringify(variant.options) === JSON.stringify(selectedOptions)
+        );
+
+        if (!matchedVariant) return;
+
+        // Update variant ID (fix add to cart issue)
+        variantInput.value = matchedVariant.id;
+
+        // Update main price
+        mainPrice.innerHTML = Shopify.formatMoney(matchedVariant.price, "{{ shop.money_format }}");
+
+        // Update compare-at price & sale badge
+        if (matchedVariant.compare_at_price > matchedVariant.price) {
+            comparePrice.innerHTML = Shopify.formatMoney(matchedVariant.compare_at_price, "{{ shop.money_format }}");
+            comparePrice.style.display = "inline";
+            saleBadge.style.display = "inline-block";
+        } else {
+            comparePrice.style.display = "none";
+            saleBadge.style.display = "none";
+        }
+
+        // Optional: disable Add to Cart when sold out
+        const addBtn = form.querySelector('button[name="add"]');
+        if (!matchedVariant.available) {
+            addBtn.disabled = true;
+            addBtn.innerText = "Sold Out";
+        } else {
+            addBtn.disabled = false;
+            addBtn.innerText = "Add to Cart";
+        }
+
+        console.log("Variant changed to:", matchedVariant.id);
+    }
+
+    // Run on dropdown change
+    selects.forEach(select => {
+        select.addEventListener('change', updateVariant);
+    });
+
+});
+</script>
