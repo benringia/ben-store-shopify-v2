@@ -2,7 +2,7 @@
 
 {% assign main_menu_linklist = linklists[section.settings.menu].links %}
 
-<div class="relative bg-white" x-data="{ mobileMenuOpen: false }">
+<div class="relative bg-white" x-data="{ mobileMenuOpen: false, searchBarOpen: false }">
     <div class="mx-auto px-4 sm:px-6">
       <div class="flex justify-between items-center py-6 md:justify-start md:space-x-10">
         <!-- STORE NAME / STORE LOGO -->
@@ -65,6 +65,9 @@
   
         <!-- CART BUTTON / ACCOUNT LINKS IF ENABLED -->
           <div class="hidden md:flex items-center justify-end md:flex-1 space-x-5">
+            <button x-on:click="searchBarOpen= true" type="button" class="whitespace-nowrap text-base text-gray-500 hover:text-gray-900">
+              {% render 'icon-search' %}
+            </button>
               <a href="{{ routes.cart_url }}" class="whitespace-nowrap text-base text-gray-500 hover:text-gray-900">
                   {% render 'icon-shopping-bag' %}
               </a>
@@ -80,10 +83,9 @@
               {% endif %}
           </div>
       </div>
-    </div>
 
 
-    <!-- MOBILE MENU CONTAINER -->
+      <!-- MOBILE MENU CONTAINER -->
       <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" class="absolute z-10 top-0 inset-x-0 p-2 transform origin-top-left md:hidden">
           <div class="shadow-lg rounded-lg ring-1 ring-black ring-opacity-5 bg-white w-full">
               <div class="p-5 divide-y-2 divide-gray-50">
@@ -141,7 +143,27 @@
               </div>
           </div>
       </div>
+    </div>
+
+   <div x-show="searchBarOpen" class="w-full absolute top-0 bg-white border z-50">
+      <button class="absolute top-0 right-0 mr-5 mt-5 text-gray-500" type="button" x-on:click="searchBarOpen = false">
+        {% render 'icon-close' %}
+      </button>
+      <div class="h-40 flex justify-center items-center bg-white">
+        <form action="{{ routes.search_url }}" method="get" >
+          <div class="relative text-gray-500 px-10 border border-gray-400 flex items-center">
+            <input type="search" name="q" id="" placeholder="Search.." class="w-full bg-white h-10 px-5 pr-10 rounded-full text-sm focus:outline-none">
+            <button type="submit" class="absolute right-0 top-0 mt-2 mr-2 ">
+              {% render 'icon-search' %}
+            </button>
+          </div>
+        </form>
+      </div>
+   </div>
+    
 </div>
+
+ 
 
 
 {% schema %}
